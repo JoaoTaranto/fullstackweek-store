@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ProductWithTotalPrice } from "@/helpers/product";
+import { prismaClient } from "@/lib/prisma";
 
 export type ProductWithTotalPriceAndCategory = ProductWithTotalPrice & {
   category: {
@@ -19,7 +20,12 @@ interface ProductsTableProps {
   products: ProductWithTotalPriceAndCategory[];
 }
 
-const ProductsTable = ({ products }: ProductsTableProps) => {
+const ProductsTable = async ({ products }: ProductsTableProps) => {
+  const sold = await prismaClient.order.findMany({
+    where: {
+      status: "PAYMENT_CONFIRMED",
+    },
+  });
   return (
     <Table>
       <TableHeader>
@@ -42,7 +48,7 @@ const ProductsTable = ({ products }: ProductsTableProps) => {
 
             <TableCell>R$ {product.basePrice.toFixed(2)}</TableCell>
 
-            <TableCell>0</TableCell>
+            <TableCell>{sold.length}</TableCell>
           </TableRow>
         ))}
       </TableBody>
